@@ -23,6 +23,7 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		146834051AC3E58100842450 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
 		5172FE7A1BDC6E10005FB0BF /* iTunesArtwork@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 5172FE791BDC6E10005FB0BF /* iTunesArtwork@2x.png */; };
+		5172FE7D1BDCA53E005FB0BF /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 5172FE7C1BDCA53E005FB0BF /* Settings.bundle */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 /* End PBXBuildFile section */
 
@@ -127,6 +128,7 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Garage/main.m; sourceTree = "<group>"; };
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
 		5172FE791BDC6E10005FB0BF /* iTunesArtwork@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "iTunesArtwork@2x.png"; path = "Garage/Images.xcassets/iTunesArtwork@2x.png"; sourceTree = "<group>"; };
+		5172FE7C1BDCA53E005FB0BF /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -291,6 +293,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				5172FE7C1BDCA53E005FB0BF /* Settings.bundle */,
 				13B07FAE1A68108700A75B9A /* Garage */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* GarageTests */,
@@ -513,6 +516,7 @@
 			files = (
 				008F07F31AC5B25A0029DE68 /* main.jsbundle in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				5172FE7D1BDCA53E005FB0BF /* Settings.bundle in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
 				5172FE7A1BDC6E10005FB0BF /* iTunesArtwork@2x.png in Resources */,
 			);
