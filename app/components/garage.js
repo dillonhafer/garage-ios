@@ -30,9 +30,17 @@ var Garage = React.createClass({
   _loadPreferences: function() {
     var self = this;
     UserDefaults.stringForKey('server_address_preference')
-      .then(value => { self.setState({baseApi: value}); });
+      .then(value => {
+        if (value !== null) {
+          self.setState({baseApi: value});
+        }
+      });
     UserDefaults.stringForKey('shared_secret_preference')
-      .then(value => { self.setState({sharedSecret: value}); });
+      .then(value => {
+        if (value !== null) {
+          self.setState({sharedSecret: value});
+        }
+      });
   },
   signString: function(string_to_sign, shared_secret) {
     var hmac = crypto.HmacSHA512(string_to_sign, shared_secret);
