@@ -43,8 +43,8 @@ var Garage = React.createClass({
       });
   },
   signString: function(string_to_sign, shared_secret) {
-    var hmac = crypto.HmacSHA512(string_to_sign, shared_secret);
-    return hmac;
+    var hmac = crypto.HmacSHA512(string_to_sign.toString(), shared_secret);
+    return base64.encode(hmac)
   },
   fullPath: function(path) {
     return `${this.state.baseApi}${path}`;
@@ -72,13 +72,13 @@ var Garage = React.createClass({
 
     var self = this;
     self.loading();
-    var data = JSON.stringify({timestamp: Math.round(new Date().getTime()/1000)});
-    var signature = this.signString(data, this.state.sharedSecret);
 
-    var encoded_json = base64.encode(data);
-    var encoded_signature = base64.encode(signature);
-    var params = {data: encoded_json, signature: encoded_signature};
-    this.get('/', params).then((r) => self.unloading());
+    var timestamp = Math.round(new Date().getTime()/1000);
+    var signature = this.signString(timestamp, this.state.sharedSecret);
+    this.get('/', {
+      timestamp: timestamp,
+      signature: signature
+    }).then((r) => self.unloading());
   },
   missingPreferences: function() {
     return (
