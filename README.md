@@ -2,6 +2,16 @@
 
 An iOS client for the Raspberry Pi [garage-server](https://github.com/dillonhafer/garage-server).
 
+# Installation
+
+After the app is running in the iOS simulator or on your device you will need to go to
+
+```
+Settings.app > Garage
+```
+
+and enter the full url `(e.g. https://example.com:8225)` and the shared secret you used in the [garage-server](https://github.com/dillonhafer/garage-server) configuration.
+
 ## License
 
    Copyright 2015 Dillon Hafer
