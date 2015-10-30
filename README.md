@@ -2,7 +2,7 @@
 
 An iOS client for the Raspberry Pi [garage-server](https://github.com/dillonhafer/garage-server).
 
-# Installation
+## Installation
 
 After the app is running in the iOS simulator or on your device you will need to go to
 
