@@ -49,15 +49,16 @@ var Garage = React.createClass({
   fullPath: function(path) {
     return `${this.state.baseApi}${path}`;
   },
-  get: function(path, params) {
+  get: function(path, body, signature) {
     var fullPath = this.fullPath(path);
     return fetch(fullPath, Object.assign({
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'signature': signature
       },
-      body: JSON.stringify(params)
+      body: body
     }));
   },
   loading: function() {
@@ -73,12 +74,12 @@ var Garage = React.createClass({
     var self = this;
     self.loading();
 
-    var timestamp = Math.round(new Date().getTime()/1000);
-    var signature = this.signString(timestamp, this.state.sharedSecret);
-    this.get('/', {
-      timestamp: timestamp,
-      signature: signature
-    }).then((r) => self.unloading());
+    var params = {"timestamp": Math.round(new Date().getTime()/1000)};
+    var body = JSON.stringify(params)
+    var signature = this.signString(body, this.state.sharedSecret);
+
+    this.get('/', body, signature)
+        .then((r) => self.unloading());
   },
   missingPreferences: function() {
     return (
