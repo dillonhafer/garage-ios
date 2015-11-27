@@ -18,7 +18,8 @@ var Garage = React.createClass({
     return {
       loading: false,
       sharedSecret: '',
-      baseApi: ''
+      baseApi: '',
+      doorStatus: ''
     }
   },
   preferencesLoaded: function() {
@@ -26,6 +27,7 @@ var Garage = React.createClass({
   },
   componentDidMount: function() {
     this._loadPreferences();
+    setInterval(this.garageStatus, 1000);
   },
   _loadPreferences: function() {
     var self = this;
@@ -67,6 +69,11 @@ var Garage = React.createClass({
   unloading: function() {
     this.setState({loading: false})
   },
+  garageStatus: function() {
+    this.get('/status', '', '')
+        .then((r) => r.json())
+        .then((json) => this.setState({doorStatus: json.door_status}));
+  },
   toggleGarage: function() {
     if (this.state.loading)
       return
@@ -94,7 +101,8 @@ var Garage = React.createClass({
     var text = this.state.loading ? 'Please wait...' : 'Toggle Garage Doori';
     return (
       <View style={[styles.container, loading]}>
-         <TouchableHighlight
+        <Text style={[styles.door_status, styles[this.state.doorStatus]]}>{this.state.doorStatus}</Text>
+        <TouchableHighlight
           style={styles.button}
           underlayColor='#74C0DC'
           onPress={this.toggleGarage}>
@@ -127,6 +135,24 @@ var styles = StyleSheet.create({
   },
   loading: {
     opacity: 0.3
+  },
+  door_status: {
+    justifyContent: 'center',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    borderRadius: 5,
+    padding: 8,
+    width: 120,
+    position: 'relative',
+    top: -100
+  },
+  closed: {
+    backgroundColor: '#0069A4',
+    color: 'white'
+  },
+  open: {
+    backgroundColor: '#d75351',
+    color: 'white'
   },
   button: {
     backgroundColor: '#86DEFF',
