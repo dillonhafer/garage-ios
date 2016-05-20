@@ -1,7 +1,3 @@
-import crypto from 'crypto-js';
-import base64 from 'base-64';
-import UserDefaults from 'react-native-userdefaults-ios';
-
 import React, {
   Component,
 } from 'react';
@@ -14,6 +10,10 @@ import {
   View,
   TouchableHighlight,
 } from 'react-native';
+
+import crypto from 'crypto-js';
+import base64 from 'base-64';
+import UserDefaults from 'react-native-userdefaults-ios';
 
 class Garage extends React.Component {
   constructor() {
@@ -35,24 +35,22 @@ class Garage extends React.Component {
     setInterval(this.garageStatus, 1000);
   }
 
-  loadPreferences = async () => {
+  loadPreferences = async() => {
     try {
       let baseApi = await UserDefaults.stringForKey('server_address_preference');
-      if (baseApi !== null) {
+      if (baseApi !== null)
         this.setState({baseApi: baseApi.trim()});
-      }
 
       let sharedSecret = await UserDefaults.stringForKey('shared_secret_preference');
-      if (sharedSecret !== null) {
+      if (sharedSecret !== null)
         this.setState({sharedSecret: sharedSecret.trim()});
-      }
     } catch(err) {
-      console.log(err)
+      console.log(err);
     }
   }
 
   signString(string_to_sign, shared_secret) {
-    var hmac = crypto.HmacSHA512(string_to_sign.toString(), shared_secret);
+    const hmac = crypto.HmacSHA512(string_to_sign.toString(), shared_secret);
     return base64.encode(hmac)
   }
 
@@ -70,33 +68,41 @@ class Garage extends React.Component {
   }
 
   loading() {
-    this.setState({loading: true})
+    this.setState({loading: true});
   }
 
   unloading() {
-    this.setState({loading: false})
+    this.setState({loading: false});
   }
 
-  garageStatus = () => {
+  garageStatus = async() => {
     if (this.preferencesLoaded())
-      this.get('/status', '', '')
-          .then((r) => r.json())
-          .then((json) => this.setState({doorStatus: json.door_status}));
+      try {
+        let resp = await this.get('/status', '', '');
+        if (resp !== null)
+          resp.json().then(json => this.setState({doorStatus: json.door_status}));
+      } catch(err) {
+        console.log(err);
+      }
   }
 
-  toggleGarage = () => {
+  toggleGarage = async() => {
     if (this.state.loading)
       return
 
-    var self = this;
-    self.loading();
+    this.loading();
 
-    var params = {"timestamp": Math.round(new Date().getTime()/1000)};
-    var body = JSON.stringify(params)
-    var signature = this.signString(body, this.state.sharedSecret);
+    const params = {"timestamp": Math.round(new Date().getTime()/1000)};
+    const body = JSON.stringify(params);
+    const signature = this.signString(body, this.state.sharedSecret);
 
-    this.get('/', body, signature)
-        .then((r) => self.unloading());
+    try {
+      let resp = await this.get('/', body, signature);
+      if (resp !== null)
+        this.unloading();
+    } catch(err) {
+      console.log(err);
+    }
   }
 
   missingPreferences() {
@@ -109,8 +115,7 @@ class Garage extends React.Component {
   }
 
   button() {
-    var loading = this.state.loading ? styles.loading : {};
-    var text = this.state.loading ? 'Please wait...' : 'Toggle Garage Doori';
+    const loading = this.state.loading ? styles.loading : {};
     return (
       <View style={[styles.container, loading]}>
         <Text style={[styles.door_status, styles[this.state.doorStatus]]}>{this.state.doorStatus}</Text>
@@ -125,11 +130,11 @@ class Garage extends React.Component {
   }
 
   render() {
-    return this.preferencesLoaded() ? this.button() : this.missingPreferences()
+    return this.preferencesLoaded() ? this.button() : this.missingPreferences();
   }
 }
 
-var styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
