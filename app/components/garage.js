@@ -31,25 +31,24 @@ class Garage extends React.Component {
   }
 
   componentDidMount() {
-    this._loadPreferences();
+    this.loadPreferences();
     setInterval(this.garageStatus, 1000);
   }
 
-  _loadPreferences() {
-    UserDefaults.stringForKey('server_address_preference')
-      .then(value => {
-        if (value !== null) {
-          const baseApi = value.trim();
-          this.setState({baseApi});
-        }
-      });
-    UserDefaults.stringForKey('shared_secret_preference')
-      .then(value => {
-        if (value !== null) {
-          const sharedSecret = value.trim();
-          this.setState({sharedSecret});
-        }
-      });
+  loadPreferences = async () => {
+    try {
+      let baseApi = await UserDefaults.stringForKey('server_address_preference');
+      if (baseApi !== null) {
+        this.setState({baseApi: baseApi.trim()});
+      }
+
+      let sharedSecret = await UserDefaults.stringForKey('shared_secret_preference');
+      if (sharedSecret !== null) {
+        this.setState({sharedSecret: sharedSecret.trim()});
+      }
+    } catch(err) {
+      console.log(err)
+    }
   }
 
   signString(string_to_sign, shared_secret) {
