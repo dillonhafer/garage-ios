@@ -33,7 +33,7 @@ class Garage extends React.Component {
 
   componentDidMount() {
     this.loadPreferences();
-    setInterval(this.garageStatus, 1000);
+    setInterval(this.garageStatus, 1500);
     AppState.addEventListener('change', this.handleAppStateChange);
   }
 
