@@ -10,6 +10,7 @@ import {
   Text,
   View,
   TouchableHighlight,
+  LayoutAnimation,
 } from 'react-native';
 
 import crypto from 'crypto-js';
@@ -23,7 +24,7 @@ class Garage extends React.Component {
       loading: false,
       sharedSecret: '',
       baseApi: '',
-      doorStatus: ''
+      doorStatus: 'loading',
     };
   }
 
@@ -32,12 +33,19 @@ class Garage extends React.Component {
   }
 
   componentDidMount() {
+    LayoutAnimation.spring();
     this.loadPreferences();
-    setInterval(this.garageStatus, 1500);
+    this.startPolling();
     AppState.addEventListener('change', this.handleAppStateChange);
   }
 
+  startPolling() {
+    const pid = setInterval(this.garageStatus, 1500);
+    this.setState({pid});
+  }
+
   componentWillUnmount() {
+    clearInterval(this.state.pid);
     AppState.removeEventListener('change', this.handleAppStateChange);
   }
 
@@ -127,15 +135,17 @@ class Garage extends React.Component {
   }
 
   button() {
-    const loading = this.state.loading ? styles.loading : {};
+    const loading  = this.state.loading ? styles.buttonLoading : {};
     return (
       <View style={[styles.container, loading]}>
-        <Text style={[styles.door_status, styles[this.state.doorStatus]]}>{this.state.doorStatus}</Text>
+        <View style={styles.door_status}>
+          <Text style={[styles.door_button, styles[this.state.doorStatus]]}>{this.state.doorStatus}</Text>
+        </View>
         <TouchableHighlight
           style={styles.button}
           underlayColor='#74C0DC'
           onPress={this.toggleGarage}>
-          <Text style={styles.buttonText}></Text>
+          <View />
         </TouchableHighlight>
       </View>
     );
@@ -149,7 +159,7 @@ class Garage extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    flexDirection: 'column',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
   },
@@ -163,18 +173,19 @@ const styles = StyleSheet.create({
     color: '#333333',
     marginBottom: 5,
   },
-  loading: {
-    opacity: 0.3
+  buttonLoading: {
+    opacity: 0.3,
   },
   door_status: {
-    justifyContent: 'center',
+    flex: 1,
+    marginTop: 80,
+  },
+  door_button: {
     textAlign: 'center',
     fontWeight: 'bold',
     borderRadius: 5,
     padding: 8,
     width: 120,
-    position: 'relative',
-    top: -100
   },
   closed: {
     backgroundColor: '#0069A4',
@@ -182,6 +193,11 @@ const styles = StyleSheet.create({
   },
   open: {
     backgroundColor: '#d75351',
+    color: 'white'
+  },
+  loading: {
+    opacity: 0.5,
+    backgroundColor: '#777777',
     color: 'white'
   },
   button: {
@@ -194,12 +210,7 @@ const styles = StyleSheet.create({
     width: 200,
     borderColor: '#0069A4',
     borderWidth: 8,
-
-  },
-  buttonText: {
-    textAlign: 'center',
-    fontWeight: 'bold',
-    color: '#ffffff',
+    marginBottom: 150,
   },
 });
 
