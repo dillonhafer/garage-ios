@@ -1,11 +1,9 @@
-'use strict';
-
-var React = require('react-native');
-var {
+import {
   AppRegistry,
-  StatusBarIOS
-} = React;
-StatusBarIOS.setStyle('light-content', true);
+  StatusBar
+} from 'react-native';
 
-var Garage = require('./app/components/garage');
+import Garage from './app/components/garage';
+
+StatusBar.setBarStyle('light-content', true);
 AppRegistry.registerComponent('Garage', () => Garage);

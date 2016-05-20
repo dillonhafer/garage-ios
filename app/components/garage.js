@@ -1,104 +1,121 @@
-'use strict';
+import React, {
+  Component,
+} from 'react';
 
-var crypto = require('crypto-js');
-var base64 = require('base-64');
-var UserDefaults = require('react-native-userdefaults-ios');
-var React = require('react-native');
-var {
-  AlertIOS,
-  AsyncStorage,
+import {
+  AppRegistry,
+  Image,
   StyleSheet,
   Text,
+  View,
   TouchableHighlight,
-  View
-} = React;
+} from 'react-native';
 
-var Garage = React.createClass({
-  getInitialState: function() {
-    return {
+import crypto from 'crypto-js';
+import base64 from 'base-64';
+import UserDefaults from 'react-native-userdefaults-ios';
+
+class Garage extends React.Component {
+  constructor() {
+    super();
+    this.state = {
       loading: false,
       sharedSecret: '',
       baseApi: '',
       doorStatus: ''
-    }
-  },
-  preferencesLoaded: function() {
-    return this.state.sharedSecret.trim() != '' && this.state.baseApi.trim() != ''
-  },
-  componentDidMount: function() {
-    this._loadPreferences();
+    };
+  }
+
+  preferencesLoaded() {
+    return this.state.sharedSecret != '' && this.state.baseApi != ''
+  }
+
+  componentDidMount() {
+    this.loadPreferences();
     setInterval(this.garageStatus, 1000);
-  },
-  _loadPreferences: function() {
-    var self = this;
-    UserDefaults.stringForKey('server_address_preference')
-      .then(value => {
-        if (value !== null) {
-          self.setState({baseApi: value});
-        }
-      });
-    UserDefaults.stringForKey('shared_secret_preference')
-      .then(value => {
-        if (value !== null) {
-          self.setState({sharedSecret: value});
-        }
-      });
-  },
-  signString: function(string_to_sign, shared_secret) {
-    var hmac = crypto.HmacSHA512(string_to_sign.toString(), shared_secret);
+  }
+
+  loadPreferences = async() => {
+    try {
+      let baseApi = await UserDefaults.stringForKey('server_address_preference');
+      if (baseApi !== null)
+        this.setState({baseApi: baseApi.trim()});
+
+      let sharedSecret = await UserDefaults.stringForKey('shared_secret_preference');
+      if (sharedSecret !== null)
+        this.setState({sharedSecret: sharedSecret.trim()});
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
+  signString(string_to_sign, shared_secret) {
+    const hmac = crypto.HmacSHA512(string_to_sign.toString(), shared_secret);
     return base64.encode(hmac)
-  },
-  fullPath: function(path) {
-    return `${this.state.baseApi}${path}`;
-  },
-  get: function(path, body, signature) {
-    var fullPath = this.fullPath(path);
+  }
+
+  get(path, body, signature) {
+    const fullPath = `${this.state.baseApi}${path}`;
     return fetch(fullPath, Object.assign({
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'signature': signature
+        signature
       },
-      body: body
+      body
     }));
-  },
-  loading: function() {
-    this.setState({loading: true})
-  },
-  unloading: function() {
-    this.setState({loading: false})
-  },
-  garageStatus: function() {
-    this.get('/status', '', '')
-        .then((r) => r.json())
-        .then((json) => this.setState({doorStatus: json.door_status}));
-  },
-  toggleGarage: function() {
+  }
+
+  loading() {
+    this.setState({loading: true});
+  }
+
+  unloading() {
+    this.setState({loading: false});
+  }
+
+  garageStatus = async() => {
+    if (this.preferencesLoaded())
+      try {
+        let resp = await this.get('/status', '', '');
+        if (resp !== null)
+          resp.json().then(json => this.setState({doorStatus: json.door_status}));
+      } catch(err) {
+        console.log(err);
+      }
+  }
+
+  toggleGarage = async() => {
     if (this.state.loading)
       return
 
-    var self = this;
-    self.loading();
+    this.loading();
 
-    var params = {"timestamp": Math.round(new Date().getTime()/1000)};
-    var body = JSON.stringify(params)
-    var signature = this.signString(body, this.state.sharedSecret);
+    const params = {"timestamp": Math.round(new Date().getTime()/1000)};
+    const body = JSON.stringify(params);
+    const signature = this.signString(body, this.state.sharedSecret);
 
-    this.get('/', body, signature)
-        .then((r) => self.unloading());
-  },
-  missingPreferences: function() {
+    try {
+      let resp = await this.get('/', body, signature);
+      if (resp !== null)
+        this.unloading();
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
+  missingPreferences() {
     return (
       <View style={styles.container}>
         <Text>Missing Preferences</Text>
         <Text>Please add them under settings</Text>
       </View>
     );
-  },
-  button: function() {
-    var loading = this.state.loading ? styles.loading : {};
-    var text = this.state.loading ? 'Please wait...' : 'Toggle Garage Doori';
+  }
+
+  button() {
+    const loading = this.state.loading ? styles.loading : {};
     return (
       <View style={[styles.container, loading]}>
         <Text style={[styles.door_status, styles[this.state.doorStatus]]}>{this.state.doorStatus}</Text>
@@ -110,13 +127,14 @@ var Garage = React.createClass({
         </TouchableHighlight>
       </View>
     );
-  },
-  render: function() {
-    return this.preferencesLoaded() ? this.button() : this.missingPreferences()
   }
-});
 
-var styles = StyleSheet.create({
+  render() {
+    return this.preferencesLoaded() ? this.button() : this.missingPreferences();
+  }
+}
+
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
