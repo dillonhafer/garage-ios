@@ -27,7 +27,7 @@ class Garage extends React.Component {
   }
 
   preferencesLoaded() {
-    return this.state.sharedSecret.trim() != '' && this.state.baseApi.trim() != ''
+    return this.state.sharedSecret != '' && this.state.baseApi != ''
   }
 
   componentDidMount() {
@@ -36,17 +36,18 @@ class Garage extends React.Component {
   }
 
   _loadPreferences() {
-    var self = this;
     UserDefaults.stringForKey('server_address_preference')
       .then(value => {
         if (value !== null) {
-          self.setState({baseApi: value});
+          const baseApi = value.trim();
+          this.setState({baseApi});
         }
       });
     UserDefaults.stringForKey('shared_secret_preference')
       .then(value => {
         if (value !== null) {
-          self.setState({sharedSecret: value});
+          const sharedSecret = value.trim();
+          this.setState({sharedSecret});
         }
       });
   }
