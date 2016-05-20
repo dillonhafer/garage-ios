@@ -1,35 +1,41 @@
-'use strict';
+import crypto from 'crypto-js';
+import base64 from 'base-64';
+import UserDefaults from 'react-native-userdefaults-ios';
 
-var crypto = require('crypto-js');
-var base64 = require('base-64');
-var UserDefaults = require('react-native-userdefaults-ios');
-var React = require('react-native');
-var {
-  AlertIOS,
-  AsyncStorage,
+import React, {
+  Component,
+} from 'react';
+
+import {
+  AppRegistry,
+  Image,
   StyleSheet,
   Text,
+  View,
   TouchableHighlight,
-  View
-} = React;
+} from 'react-native';
 
-var Garage = React.createClass({
-  getInitialState: function() {
-    return {
+class Garage extends React.Component {
+  constructor() {
+    super();
+    this.state = {
       loading: false,
       sharedSecret: '',
       baseApi: '',
       doorStatus: ''
-    }
-  },
-  preferencesLoaded: function() {
+    };
+  }
+
+  preferencesLoaded() {
     return this.state.sharedSecret.trim() != '' && this.state.baseApi.trim() != ''
-  },
-  componentDidMount: function() {
+  }
+
+  componentDidMount() {
     this._loadPreferences();
     setInterval(this.garageStatus, 1000);
-  },
-  _loadPreferences: function() {
+  }
+
+  _loadPreferences() {
     var self = this;
     UserDefaults.stringForKey('server_address_preference')
       .then(value => {
@@ -43,38 +49,42 @@ var Garage = React.createClass({
           self.setState({sharedSecret: value});
         }
       });
-  },
-  signString: function(string_to_sign, shared_secret) {
+  }
+
+  signString(string_to_sign, shared_secret) {
     var hmac = crypto.HmacSHA512(string_to_sign.toString(), shared_secret);
     return base64.encode(hmac)
-  },
-  fullPath: function(path) {
-    return `${this.state.baseApi}${path}`;
-  },
-  get: function(path, body, signature) {
-    var fullPath = this.fullPath(path);
+  }
+
+  get(path, body, signature) {
+    const fullPath = `${this.state.baseApi}${path}`;
     return fetch(fullPath, Object.assign({
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'signature': signature
+        signature
       },
-      body: body
+      body
     }));
-  },
-  loading: function() {
+  }
+
+  loading() {
     this.setState({loading: true})
-  },
-  unloading: function() {
+  }
+
+  unloading() {
     this.setState({loading: false})
-  },
-  garageStatus: function() {
-    this.get('/status', '', '')
-        .then((r) => r.json())
-        .then((json) => this.setState({doorStatus: json.door_status}));
-  },
-  toggleGarage: function() {
+  }
+
+  garageStatus = () => {
+    if (this.preferencesLoaded())
+      this.get('/status', '', '')
+          .then((r) => r.json())
+          .then((json) => this.setState({doorStatus: json.door_status}));
+  }
+
+  toggleGarage = () => {
     if (this.state.loading)
       return
 
@@ -87,16 +97,18 @@ var Garage = React.createClass({
 
     this.get('/', body, signature)
         .then((r) => self.unloading());
-  },
-  missingPreferences: function() {
+  }
+
+  missingPreferences() {
     return (
       <View style={styles.container}>
         <Text>Missing Preferences</Text>
         <Text>Please add them under settings</Text>
       </View>
     );
-  },
-  button: function() {
+  }
+
+  button() {
     var loading = this.state.loading ? styles.loading : {};
     var text = this.state.loading ? 'Please wait...' : 'Toggle Garage Doori';
     return (
@@ -110,11 +122,12 @@ var Garage = React.createClass({
         </TouchableHighlight>
       </View>
     );
-  },
-  render: function() {
+  }
+
+  render() {
     return this.preferencesLoaded() ? this.button() : this.missingPreferences()
   }
-});
+}
 
 var styles = StyleSheet.create({
   container: {

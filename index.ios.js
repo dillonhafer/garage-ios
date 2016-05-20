@@ -3,9 +3,9 @@
 var React = require('react-native');
 var {
   AppRegistry,
-  StatusBarIOS
+  StatusBar
 } = React;
-StatusBarIOS.setStyle('light-content', true);
+StatusBar.setBarStyle('light-content', true);
 
 var Garage = require('./app/components/garage');
 AppRegistry.registerComponent('Garage', () => Garage);
