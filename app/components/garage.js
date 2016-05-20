@@ -4,6 +4,7 @@ import React, {
 
 import {
   AppRegistry,
+  AppState,
   Image,
   StyleSheet,
   Text,
@@ -33,6 +34,17 @@ class Garage extends React.Component {
   componentDidMount() {
     this.loadPreferences();
     setInterval(this.garageStatus, 1000);
+    AppState.addEventListener('change', this.handleAppStateChange);
+  }
+
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this.handleAppStateChange);
+  }
+
+  handleAppStateChange = (currentAppState) => {
+    if (currentAppState === 'active') {
+      this.loadPreferences();
+    }
   }
 
   loadPreferences = async() => {
