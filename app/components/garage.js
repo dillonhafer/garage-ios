@@ -5,17 +5,48 @@ import React, {
 import {
   AppRegistry,
   AppState,
+  Dimensions,
   Image,
+  LayoutAnimation,
   StyleSheet,
   Text,
-  View,
   TouchableHighlight,
-  LayoutAnimation,
+  View,
 } from 'react-native';
 
 import crypto from 'crypto-js';
 import base64 from 'base-64';
 import UserDefaults from 'react-native-userdefaults-ios';
+import SideMenu from 'react-native-side-menu';
+
+import {get,post} from './api';
+
+let {height, width} = Dimensions.get('window');
+
+class Menu extends React.Component {
+  constructor() {
+    super();
+  }
+
+  render() {
+    return (
+      <View style={styles.menuBackground}>
+        <View style={styles.menu}>
+          <Text style={styles.menuTitle}>Garage iOS</Text>
+          <Text style={styles.menuSubTitle}>Server Version v{this.props.serverVersion}</Text>
+          <View style={styles.center}>
+            <TouchableHighlight
+              style={styles.touchButton}
+              underlayColor='#74C0DC'
+              onPress={() =>{}}>
+              <Text style={styles.touchButtonText}>View Logs</Text>
+            </TouchableHighlight>
+          </View>
+        </View>
+      </View>
+    );
+  }
+}
 
 class Garage extends React.Component {
   constructor() {
@@ -25,6 +56,7 @@ class Garage extends React.Component {
       sharedSecret: '',
       baseApi: '',
       doorStatus: 'loading',
+      serverVersion: '',
     };
   }
 
@@ -55,11 +87,22 @@ class Garage extends React.Component {
     }
   }
 
+  loadServerVersion = async() => {
+    try {
+      let resp = await get(this.fullPath('/version'));
+      if (resp !== null)
+        resp.json().then(json => this.setState({serverVersion: json.version}));
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
   loadPreferences = async() => {
     try {
       let baseApi = await UserDefaults.stringForKey('server_address_preference');
       if (baseApi !== null)
         this.setState({baseApi: baseApi.trim()});
+        this.loadServerVersion();
 
       let sharedSecret = await UserDefaults.stringForKey('shared_secret_preference');
       if (sharedSecret !== null)
@@ -69,22 +112,13 @@ class Garage extends React.Component {
     }
   }
 
+  fullPath = (path) => {
+    return `${this.state.baseApi}${path}`;
+  }
+
   signString(string_to_sign, shared_secret) {
     const hmac = crypto.HmacSHA512(string_to_sign.toString(), shared_secret);
     return base64.encode(hmac)
-  }
-
-  get(path, body, signature) {
-    const fullPath = `${this.state.baseApi}${path}`;
-    return fetch(fullPath, Object.assign({
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        signature
-      },
-      body
-    }));
   }
 
   loading() {
@@ -98,7 +132,7 @@ class Garage extends React.Component {
   garageStatus = async() => {
     if (this.preferencesLoaded())
       try {
-        let resp = await this.get('/status', '', '');
+        let resp = await get(this.fullPath('/status'));
         if (resp !== null)
           resp.json().then(json => this.setState({doorStatus: json.door_status}));
       } catch(err) {
@@ -117,7 +151,7 @@ class Garage extends React.Component {
     const signature = this.signString(body, this.state.sharedSecret);
 
     try {
-      let resp = await this.get('/', body, signature);
+      let resp = await post(this.fullPath('/'), body, signature);
       if (resp !== null)
         this.unloading();
     } catch(err) {
@@ -152,15 +186,51 @@ class Garage extends React.Component {
   }
 
   render() {
-    return this.preferencesLoaded() ? this.button() : this.missingPreferences();
+    const preferencesLoaded = this.preferencesLoaded();
+    const menu = <Menu serverVersion={this.state.serverVersion} />;
+    return (
+      <SideMenu
+        menu={menu}
+        disableGestures={!preferencesLoaded}
+        openMenuOffset={width - 60}
+        edgeHitWidth={width}
+        >
+        {preferencesLoaded ? this.button() : this.missingPreferences()}
+      </SideMenu>
+    )
   }
 }
 
 const styles = StyleSheet.create({
+  menuBackground: {
+    backgroundColor: '#555555',
+    height: height,
+    width: width,
+  },
+  menu: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    padding: 20,
+    width: width - 60,
+  },
+  menuTitle: {
+    color: '#FFF',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  menuSubTitle: {
+    color: '#AAA',
+    textAlign: 'center',
+    fontSize: 16,
+  },
+
   container: {
     flex: 1,
     flexDirection: 'column',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#F5FCFF',
   },
   welcome: {
@@ -212,6 +282,24 @@ const styles = StyleSheet.create({
     borderWidth: 8,
     marginBottom: 150,
   },
+  touchButton: {
+    alignItems: 'center',
+    backgroundColor: '#777777',
+    borderRadius: 5,
+    justifyContent: 'center',
+    marginTop: 30,
+    padding: 8,
+    width: 120,
+  },
+  touchButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  center: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
 });
 
 module.exports = Garage;
