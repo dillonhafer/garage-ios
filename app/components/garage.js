@@ -3,8 +3,6 @@ import React, {
 } from 'react';
 
 import {
-  AppRegistry,
-  AppState,
   Dimensions,
   LayoutAnimation,
   StyleSheet,
@@ -15,9 +13,6 @@ import {
 
 import crypto from 'crypto-js';
 import base64 from 'base-64';
-import UserDefaults from 'react-native-userdefaults-ios';
-import SideMenu from 'react-native-side-menu';
-import Menu from './menu';
 
 import {get,post} from './api';
 
@@ -28,8 +23,6 @@ class Garage extends React.Component {
     super();
     this.state = {
       loading: false,
-      sharedSecret: '',
-      baseApi: '',
       doorStatus: 'loading',
       serverVersion: '?.?.?',
     };
@@ -41,9 +34,7 @@ class Garage extends React.Component {
 
   componentDidMount() {
     LayoutAnimation.spring();
-    this.loadPreferences();
     this.startPolling();
-    AppState.addEventListener('change', this.handleAppStateChange);
   }
 
   startPolling() {
@@ -53,38 +44,6 @@ class Garage extends React.Component {
 
   componentWillUnmount() {
     clearInterval(this.state.pid);
-    AppState.removeEventListener('change', this.handleAppStateChange);
-  }
-
-  handleAppStateChange = (currentAppState) => {
-    if (currentAppState === 'active') {
-      this.loadPreferences();
-    }
-  }
-
-  loadServerVersion = async() => {
-    try {
-      let resp = await get(this.fullPath('/version'));
-      if (resp !== null)
-        resp.json().then(json => this.setState({serverVersion: json.version}));
-    } catch(err) {
-      console.log(err);
-    }
-  }
-
-  loadPreferences = async() => {
-    try {
-      let baseApi = await UserDefaults.stringForKey('server_address_preference');
-      if (baseApi !== null)
-        this.setState({baseApi: baseApi.trim()});
-        this.loadServerVersion();
-
-      let sharedSecret = await UserDefaults.stringForKey('shared_secret_preference');
-      if (sharedSecret !== null)
-        this.setState({sharedSecret: sharedSecret.trim()});
-    } catch(err) {
-      console.log(err);
-    }
   }
 
   fullPath = (path) => {
@@ -105,7 +64,7 @@ class Garage extends React.Component {
   }
 
   garageStatus = async() => {
-    if (this.preferencesLoaded())
+    if (this.props.preferencesLoaded)
       try {
         let resp = await get(this.fullPath('/status'));
         if (resp !== null)
@@ -161,18 +120,7 @@ class Garage extends React.Component {
   }
 
   render() {
-    const preferencesLoaded = this.preferencesLoaded();
-    const menu = <Menu serverVersion={this.state.serverVersion} />;
-    return (
-      <SideMenu
-        menu={menu}
-        disableGestures={!preferencesLoaded}
-        openMenuOffset={width - 60}
-        edgeHitWidth={width}
-        >
-        {preferencesLoaded ? this.button() : this.missingPreferences()}
-      </SideMenu>
-    )
+    return (this.props.preferencesLoaded ? this.button() : this.missingPreferences());
   }
 }
 
