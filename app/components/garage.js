@@ -6,7 +6,6 @@ import {
   AppRegistry,
   AppState,
   Dimensions,
-  Image,
   LayoutAnimation,
   StyleSheet,
   Text,
@@ -18,35 +17,11 @@ import crypto from 'crypto-js';
 import base64 from 'base-64';
 import UserDefaults from 'react-native-userdefaults-ios';
 import SideMenu from 'react-native-side-menu';
+import Menu from './menu';
 
 import {get,post} from './api';
 
-let {height, width} = Dimensions.get('window');
-
-class Menu extends React.Component {
-  constructor() {
-    super();
-  }
-
-  render() {
-    return (
-      <View style={styles.menuBackground}>
-        <View style={styles.menu}>
-          <Text style={styles.menuTitle}>Garage iOS</Text>
-          <Text style={styles.menuSubTitle}>Server Version v{this.props.serverVersion}</Text>
-          <View style={styles.center}>
-            <TouchableHighlight
-              style={styles.touchButton}
-              underlayColor='#333333'
-              onPress={() =>{}}>
-              <Text style={styles.touchButtonText}>View Logs</Text>
-            </TouchableHighlight>
-          </View>
-        </View>
-      </View>
-    );
-  }
-}
+let {width} = Dimensions.get('window');
 
 class Garage extends React.Component {
   constructor() {
@@ -56,7 +31,7 @@ class Garage extends React.Component {
       sharedSecret: '',
       baseApi: '',
       doorStatus: 'loading',
-      serverVersion: '',
+      serverVersion: '?.?.?',
     };
   }
 
@@ -202,30 +177,6 @@ class Garage extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  menuBackground: {
-    backgroundColor: '#555555',
-    height: height,
-    width: width,
-  },
-  menu: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    padding: 20,
-    width: width - 60,
-  },
-  menuTitle: {
-    color: '#FFF',
-    textAlign: 'center',
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
-  menuSubTitle: {
-    color: '#AAA',
-    textAlign: 'center',
-    fontSize: 16,
-  },
-
   container: {
     flex: 1,
     flexDirection: 'column',
@@ -282,24 +233,6 @@ const styles = StyleSheet.create({
     borderWidth: 8,
     marginBottom: 150,
   },
-  touchButton: {
-    alignItems: 'center',
-    backgroundColor: '#777777',
-    borderRadius: 5,
-    justifyContent: 'center',
-    marginTop: 30,
-    padding: 8,
-    width: 120,
-  },
-  touchButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  center: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  }
 });
 
 module.exports = Garage;
