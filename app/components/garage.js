@@ -37,7 +37,7 @@ class Menu extends React.Component {
           <View style={styles.center}>
             <TouchableHighlight
               style={styles.touchButton}
-              underlayColor='#74C0DC'
+              underlayColor='#333333'
               onPress={() =>{}}>
               <Text style={styles.touchButtonText}>View Logs</Text>
             </TouchableHighlight>
