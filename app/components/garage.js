@@ -43,13 +43,17 @@ class Garage extends React.Component {
   }
 
   getStatus = async() => {
-    try {
-      let resp = await this.props.get('status');
-      if (resp && resp.ok)
-        resp.json().then(json => this.setState({doorStatus: json.doorStatus}));        
-    } catch(err) {
-      console.log(err);
-    }
+    if (this.props.preferencesLoaded)
+      try {
+          let resp = await this.props.get('status');
+          if (resp && resp.ok)
+            resp.json().then(json => this.setState({doorStatus: json.doorStatus}));
+          else
+            this.props.dispatch({key: 'ERROR', type: 'API'})
+            clearInterval(this.state.pid);
+      } catch(err) {
+        console.log(err);
+      }
   }
 
   toggleGarage = async() => {

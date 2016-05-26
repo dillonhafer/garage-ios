@@ -85,10 +85,22 @@ class App extends React.Component {
     this.setState({scene});
   }
 
+  error = (type) => {
+    let msg;
+    switch (type) {
+      case "API":
+        msg = `Could not connect to the API: ${this.state.baseApi}`;
+        break;
+    }
+    
+    if (msg)
+      alert(msg);
+  }
+
   currentView = (preferencesLoaded) => {
     switch (this.state.scene) {
       case 'home':
-        return <Garage preferencesLoaded={preferencesLoaded} get={this.get} />;
+        return <Garage dispatch={this.dispatch} preferencesLoaded={preferencesLoaded} get={this.get} />;
       case 'logs':
         return <Logs dispatch={this.dispatch} sharedSecret={this.state.sharedSecret} />
     }
@@ -97,7 +109,9 @@ class App extends React.Component {
   dispatch = (props) => {
     switch (props.key) {
       case 'SCENE':
-        this.updateScene(props.scene);      
+        this.updateScene(props.scene);
+      case 'ERROR':
+        this.error(props.type);
     }
   }
 
