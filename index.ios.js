@@ -5,6 +5,7 @@ import React, {
 import {
   AppRegistry,
   AppState,
+  LayoutAnimation,
   Dimensions,
 } from 'react-native';
 
@@ -13,7 +14,8 @@ import UserDefaults from 'react-native-userdefaults-ios';
 
 import Garage from './app/components/garage';
 import Menu from './app/components/menu';
-import {get} from './app/components/api';
+import Logs from './app/components/logs';
+import {authenticatedGet} from './app/components/api';
 
 let {width} = Dimensions.get('window');
 
@@ -21,13 +23,16 @@ class App extends React.Component {
   constructor() {
     super();
     this.state = {
+      scene: 'home',
       sharedSecret: '',
       baseApi: '',
       serverVersion: '?.?.?',
+      doorStatus: 'loading',
     };
   }
 
   componentDidMount() {
+    LayoutAnimation.spring();
     this.loadPreferences();
     AppState.addEventListener('change', this.handleAppStateChange);
   }
@@ -36,8 +41,9 @@ class App extends React.Component {
     AppState.removeEventListener('change', this.handleAppStateChange);
   }
 
-  fullPath = (path) => {
-    return `${this.state.baseApi}${path}`;
+  get = async(path) => {
+    const fullPath = `${this.state.baseApi}/${path}`;
+    return authenticatedGet(fullPath, this.state.sharedSecret)
   }
 
   handleAppStateChange = (currentAppState) => {
@@ -48,7 +54,7 @@ class App extends React.Component {
 
   loadServerVersion = async() => {
     try {
-      let resp = await get(this.fullPath('/version'));
+      let resp = await this.get('version');
       if (resp !== null)
         resp.json().then(json => this.setState({serverVersion: json.version}));
     } catch(err) {
@@ -61,11 +67,11 @@ class App extends React.Component {
       let baseApi = await UserDefaults.stringForKey('server_address_preference');
       if (baseApi !== null)
         this.setState({baseApi: baseApi.trim()});
-        this.loadServerVersion();
 
       let sharedSecret = await UserDefaults.stringForKey('shared_secret_preference');
       if (sharedSecret !== null)
         this.setState({sharedSecret: sharedSecret.trim()});
+        this.loadServerVersion();
     } catch(err) {
       console.log(err);
     }
@@ -75,9 +81,30 @@ class App extends React.Component {
     return this.state.sharedSecret !== '' && this.state.baseApi !== ''
   }
 
+  updateScene(scene) {
+    this.setState({scene});
+  }
+
+  currentView = (preferencesLoaded) => {
+    switch (this.state.scene) {
+      case 'home':
+        return <Garage preferencesLoaded={preferencesLoaded} get={this.get} />;
+      case 'logs':
+        return <Logs dispatch={this.dispatch} sharedSecret={this.state.sharedSecret} />
+    }
+  }
+
+  dispatch = (props) => {
+    switch (props.key) {
+      case 'SCENE':
+        this.updateScene(props.scene);      
+    }
+  }
+
   render() {
-    const menu = <Menu serverVersion={this.state.serverVersion} />;
+    const menu = <Menu serverVersion={this.state.serverVersion} dispatch={this.dispatch} />;
     const preferencesLoaded = this.preferencesLoaded();
+    const view = this.currentView(preferencesLoaded);
 
     return (
       <SideMenu
@@ -86,7 +113,7 @@ class App extends React.Component {
         openMenuOffset={width - 60}
         edgeHitWidth={width}
         >
-        <Garage preferencesLoaded={preferencesLoaded} />
+        {view}
       </SideMenu>
     )
   }

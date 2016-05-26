@@ -4,17 +4,11 @@ import React, {
 
 import {
   Dimensions,
-  LayoutAnimation,
   StyleSheet,
   Text,
   TouchableHighlight,
   View,
 } from 'react-native';
-
-import crypto from 'crypto-js';
-import base64 from 'base-64';
-
-import {get,post} from './api';
 
 let {width} = Dimensions.get('window');
 
@@ -24,35 +18,20 @@ class Garage extends React.Component {
     this.state = {
       loading: false,
       doorStatus: 'loading',
-      serverVersion: '?.?.?',
     };
   }
 
-  preferencesLoaded() {
-    return this.state.sharedSecret != '' && this.state.baseApi != ''
-  }
-
   componentDidMount() {
-    LayoutAnimation.spring();
     this.startPolling();
   }
 
   startPolling() {
-    const pid = setInterval(this.garageStatus, 1500);
+    const pid = setInterval(this.getStatus, 1500);
     this.setState({pid});
   }
 
   componentWillUnmount() {
     clearInterval(this.state.pid);
-  }
-
-  fullPath = (path) => {
-    return `${this.state.baseApi}${path}`;
-  }
-
-  signString(string_to_sign, shared_secret) {
-    const hmac = crypto.HmacSHA512(string_to_sign.toString(), shared_secret);
-    return base64.encode(hmac)
   }
 
   loading() {
@@ -63,15 +42,14 @@ class Garage extends React.Component {
     this.setState({loading: false});
   }
 
-  garageStatus = async() => {
-    if (this.props.preferencesLoaded)
-      try {
-        let resp = await get(this.fullPath('/status'));
-        if (resp !== null)
-          resp.json().then(json => this.setState({doorStatus: json.door_status}));
-      } catch(err) {
-        console.log(err);
-      }
+  getStatus = async() => {
+    try {
+      let resp = await this.props.get('status');
+      if (resp && resp.ok)
+        resp.json().then(json => this.setState({doorStatus: json.doorStatus}));        
+    } catch(err) {
+      console.log(err);
+    }
   }
 
   toggleGarage = async() => {
@@ -80,12 +58,8 @@ class Garage extends React.Component {
 
     this.loading();
 
-    const params = {"timestamp": Math.round(new Date().getTime()/1000)};
-    const body = JSON.stringify(params);
-    const signature = this.signString(body, this.state.sharedSecret);
-
     try {
-      let resp = await post(this.fullPath('/'), body, signature);
+      let resp = await this.props.get('toggle');
       if (resp !== null)
         this.unloading();
     } catch(err) {

@@ -26,7 +26,7 @@ class Menu extends React.Component {
             <TouchableHighlight
               style={styles.logsButton}
               underlayColor='#333333'
-              onPress={() =>{}}>
+              onPress={() => this.props.dispatch({key: 'SCENE', scene: 'logs'})}>
               <Text style={styles.logsButtonText}>View Logs</Text>
             </TouchableHighlight>
           </View>
