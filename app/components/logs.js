@@ -32,7 +32,7 @@ class Logs extends React.Component {
       let resp = await this.props.get('logs');
       if (resp && resp.ok) {
         let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-        resp.json().then(json => this.setState({logEntries: ds.cloneWithRows(json.logs)}));
+        resp.json().then(json => this.setState({logEntries: ds.cloneWithRows(json.entries)}));
       } else {
         this.props.dispatch({key: 'ERROR', type: 'API'});
       }

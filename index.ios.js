@@ -92,7 +92,7 @@ class App extends React.Component {
         msg = `Could not connect to the API: ${this.state.baseApi}`;
         break;
     }
-    
+
     if (msg)
       alert(msg);
   }
@@ -100,9 +100,9 @@ class App extends React.Component {
   currentView = (preferencesLoaded) => {
     switch (this.state.scene) {
       case 'home':
-        return <Garage dispatch={this.dispatch} preferencesLoaded={preferencesLoaded} get={this.get} />;
+        return <Garage dispatch={this.dispatch} get={this.get} preferencesLoaded={preferencesLoaded} />;
       case 'logs':
-        return <Logs dispatch={this.dispatch} sharedSecret={this.state.sharedSecret} />
+        return <Logs dispatch={this.dispatch} get={this.get} sharedSecret={this.state.sharedSecret} />
     }
   }
 
