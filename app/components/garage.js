@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 
 let {width} = Dimensions.get('window');
+import {blue, darkBlue, red} from './colors';
 
 class Garage extends React.Component {
   constructor() {
@@ -83,12 +84,12 @@ class Garage extends React.Component {
   button() {
     const loading  = this.state.loading ? styles.buttonLoading : {};
     return (
-      <View style={[styles.container, loading]}>
+      <View style={styles.container}>
         <View style={styles.door_status}>
           <Text style={[styles.door_button, styles[this.state.doorStatus]]}>{this.state.doorStatus}</Text>
         </View>
         <TouchableHighlight
-          style={styles.button}
+          style={[styles.button, loading]}
           underlayColor='#74C0DC'
           onPress={this.toggleGarage}>
           <View />
@@ -125,9 +126,11 @@ const styles = StyleSheet.create({
   },
   door_status: {
     flex: 1,
-    marginTop: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   door_button: {
+    overflow: 'hidden',
     textAlign: 'center',
     fontWeight: 'bold',
     borderRadius: 5,
@@ -135,11 +138,11 @@ const styles = StyleSheet.create({
     width: 120,
   },
   closed: {
-    backgroundColor: '#0069A4',
+    backgroundColor: blue,
     color: 'white'
   },
   open: {
-    backgroundColor: '#d75351',
+    backgroundColor: red,
     color: 'white'
   },
   loading: {
@@ -148,15 +151,13 @@ const styles = StyleSheet.create({
     color: 'white'
   },
   button: {
-    backgroundColor: '#86DEFF',
+    backgroundColor: blue,
     borderRadius: 100,
     marginBottom: 10,
     padding: 10,
     justifyContent: 'center',
     height: 200,
     width: 200,
-    borderColor: '#0069A4',
-    borderWidth: 8,
     marginBottom: 150,
   },
 });
