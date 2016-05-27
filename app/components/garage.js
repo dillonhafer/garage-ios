@@ -47,11 +47,12 @@ class Garage extends React.Component {
     if (this.props.preferencesLoaded)
       try {
           let resp = await this.props.get('status');
-          if (resp && resp.ok)
+          if (resp && resp.ok) {
             resp.json().then(json => this.setState({doorStatus: json.doorStatus}));
-          else
+          } else if (resp && !resp.ok) {
             this.props.dispatch({key: 'ERROR', type: 'API'})
-            clearInterval(this.state.pid);
+            clearInterval(this.state.pid)
+          }
       } catch(err) {
         console.log(err);
       }
